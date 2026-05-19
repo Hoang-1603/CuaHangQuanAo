@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Header = ({
   navigate, currentQuery = "",
@@ -8,44 +8,44 @@ const Header = ({
   user = null, onLogout,
 }) => {
   const [searchTerm, setSearchTerm] = useState(currentQuery);
+  const [dbProducts, setDbProducts] = useState([]); // State chứa toàn bộ data từ Database
 
+  // GỌI API LẤY DỮ LIỆU SẢN PHẨM KHI VÀO TRANG
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setDbProducts(data);
+      })
+      .catch(err => console.error("Lỗi lấy dữ liệu menu:", err));
+  }, []);
+
+  // ĐỊNH NGHĨA MENU & LỌC ĐỘNG 3 SẢN PHẨM MỚI NHẤT TỪ DATABASE
   const menuConfig = [
     { title: "TRANG CHỦ", path: "/", active: true },
     {
       title: "ÁO THU ĐÔNG", path: "/category/ao-thu-dong", slug: "ao-thu-dong",
       subCategories: ["Áo Nỉ / Áo Thun Dài Tay", "Áo Len", "Áo Khoác", "Cardigan", "Áo Blazer / Áo Măng Tô", "Áo Hoodie", "BỘ THỂ THAO THU ĐÔNG"],
-      featuredProducts: [
-        { id: 1,  name: "Áo Nỉ Fitted L.2.7812",  img: "/images/ao-ni-fitted-l.2.7812.jpg" },
-        { id: 2,  name: "Áo Jacket XL.2.8931",     img: "/images/ao-jacket-xl.2.8931.jpg" },
-        { id: 3,  name: "Áo Phao M.2.8561",         img: "/images/ao-phao-m.2.8561.jpg" },
-      ]
+      // Lấy 3 sản phẩm thuộc Thu Đông
+      featuredProducts: dbProducts.filter(p => ["Áo Thu Đông", "Áo Nỉ / Áo Thun Dài Tay", "Áo Len", "Áo Khoác", "Cardigan", "Áo Hoodie"].includes(p.category)).slice(0, 3)
     },
     {
       title: "ÁO XUÂN HÈ", path: "/category/ao-xuan-he", slug: "ao-xuan-he",
       subCategories: ["Áo Phông", "Áo Polo", "Áo Sơ Mi Ngắn Tay", "Bộ Thể Thao Hè", "Áo Tank Top", "Áo Sơ Mi Dài Tay"],
-      featuredProducts: [
-        { id: 11, name: "Áo Phông Regular L.3.2810", img: "/images/ao-phong-regular-l.3.2810.jpg" },
-        { id: 12, name: "Áo Phông Regular L.3.2812", img: "/images/ao-phong-regular-l.3.2812.jpg" },
-        { id: 13, name: "Áo Phông Loose L.4.2807",   img: "/images/ao-phong-loose-l.4.2807.jpg" },
-      ]
+      // Lấy 3 sản phẩm thuộc Xuân Hè
+      featuredProducts: dbProducts.filter(p => ["Áo Xuân Hè", "Áo Phông", "Áo Polo", "Áo Sơ Mi Ngắn Tay", "Bộ Thể Thao Hè", "Áo Tank Top", "Áo Sơ Mi Dài Tay"].includes(p.category)).slice(0, 3)
     },
     {
       title: "QUẦN", path: "/category/quan", slug: "quan",
       subCategories: ["Quần Dài", "Quần Short"],
-      featuredProducts: [
-        { id: 17, name: "Quần Âu Slim 30.2.QA099",       img: "/images/quan-au-slim-30.2.qa099.jpg" },
-        { id: 18, name: "Quần Nỉ Straight L.2.1843",     img: "/images/quan-ni-straight-l.2.1843.jpg" },
-        { id: 21, name: "Quần Jeans Straight 30.1.1394", img: "/images/quan-jeans-straight-30.1.1394.jpg" },
-      ]
+      // Lấy 3 sản phẩm thuộc Quần
+      featuredProducts: dbProducts.filter(p => ["Quần Nam", "Quần", "Quần Dài", "Quần Short"].includes(p.category)).slice(0, 3)
     },
     {
       title: "PHỤ KIỆN", path: "/category/phu-kien", slug: "phu-kien",
       subCategories: ["Túi/Balo", "Giày Dép", "Dây Lưng", "Mũ", "Tất"],
-      featuredProducts: [
-        { id: 25, name: "Dép Nhung 3.9803",            img: "/images/dep-nhung-3.9803.jpg" },
-        { id: 26, name: "Dép Da 1.9804",                img: "/images/dep-da-1.9804.jpg" },
-        { id: 29, name: "M204 Mũ Colorado Since 1977", img: "/images/m204-mu-colorado-since-1977.jpg" },
-      ]
+      // Lấy 3 sản phẩm thuộc Phụ kiện
+      featuredProducts: dbProducts.filter(p => ["Phụ Kiện", "Túi/Balo", "Túi / Balo", "Giày Dép", "Dây Lưng", "Mũ", "Tất"].includes(p.category)).slice(0, 3)
     },
   ];
 
@@ -90,7 +90,7 @@ const Header = ({
         .feat-products { display: flex; gap: 16px; }
         .feat-prod { cursor: pointer; text-align: center; width: 120px; flex-shrink: 0; }
         .feat-prod:hover p { color: #000; text-decoration: underline; }
-        .feat-prod img { display: block; width: 100%; height: 150px; object-fit: cover; }
+        
         .search-box { position: relative; width: 220px; flex-shrink: 0; }
         .search-box input { width: 100%; padding: 8px 35px 8px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; font-size: 13px; box-sizing: border-box; }
         .search-box span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #888; }
@@ -160,16 +160,29 @@ const Header = ({
                     ))}
                   </ul>
                   <div className="feat-products">
-                    {item.featuredProducts.map(prod => (
-                      <div key={prod.id} className="feat-prod" onClick={() => goTo(`/product/${prod.id}`)}>
-                        <img
-                          src={prod.img}
-                          alt={prod.name}
-                          onError={e => e.target.src = 'https://via.placeholder.com/120x150?text=IMG'}
-                        />
-                        <p style={{ fontSize: '11px', marginTop: '8px', fontWeight: '600', color: '#333', margin: '8px 0 0' }}>{prod.name}</p>
-                      </div>
-                    ))}
+                    {/* Render động sản phẩm thật từ DB thay vì ảnh tĩnh */}
+                    {item.featuredProducts.map(prod => {
+                      const pId = prod._id || prod.id;
+                      const pImg = prod.images && prod.images.length > 0 ? prod.images[0] : prod.img;
+                      
+                      return (
+                        <div key={pId} className="feat-prod" onClick={() => goTo(`/product/${pId}`)}>
+                          {/* Khóa tỷ lệ 3/4 */}
+                          <div style={{ width: '100%', aspectRatio: '3/4', overflow: 'hidden', backgroundColor: '#f5f5f5' }}>
+                            <img
+                              src={pImg}
+                              alt={prod.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                              onError={e => e.target.src = 'https://via.placeholder.com/120x160?text=IMG'}
+                            />
+                          </div>
+                          {/* Cắt ngắn tên nếu quá dài */}
+                          <p style={{ fontSize: '11px', marginTop: '8px', fontWeight: '600', color: '#333', margin: '8px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {prod.name}
+                          </p>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -202,11 +215,13 @@ const Header = ({
             </div>
           ) : (
             cartItems.map(item => {
-              const price = parseInt((item.product.price || '0').replace(/,/g, ''));
+              const price = parseInt((item.product.price || '0').toString().replace(/,/g, ''));
+              const pImg = item.product.images && item.product.images.length > 0 ? item.product.images[0] : item.product.img;
+              
               return (
                 <div key={item.key} className="cart-item-row">
                   <img
-                    src={item.product.img}
+                    src={pImg}
                     alt={item.product.name}
                     className="cart-item-img"
                     onError={e => e.target.src = 'https://via.placeholder.com/72x90?text=IMG'}
