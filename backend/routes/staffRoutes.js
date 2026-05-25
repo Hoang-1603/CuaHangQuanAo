@@ -1,3 +1,4 @@
+import Staff from '../models/staffModel.js';
 import express from 'express';
 const router = express.Router();
 import { 

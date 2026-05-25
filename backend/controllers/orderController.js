@@ -104,8 +104,19 @@ const updateOrderStatus = async (req, res) => {
 
 // @desc    lay don hang cua toi
 const getMyOrders = async (req, res) => {
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json(orders);
+    try {
+        // Thêm .populate để lấy thông tin sản phẩm
+        const orders = await Order.find({ user: req.user._id })
+            .populate({
+                path: 'orderItems.product', // Đường dẫn tới model Product
+                select: 'name images'     // Chỉ lấy tên và ảnh để tối ưu tốc độ
+            })
+            .sort({ createdAt: -1 });
+        
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server' });
+    }
 };
 
 // @desc    lay tat ca don hang(admin)

@@ -135,19 +135,32 @@ const LoginPage = ({ navigate, onLogin }) => {
 
     try {
       setLoading(true);
-      // Gửi request lên Backend
-      const { data } = await api.post('/api/customers/login', {
-        email: loginForm.email,
-        password: loginForm.password
-      });
+      let userData;
+
+      try {
+        // 1. Thử đăng nhập bằng API dành cho Khách hàng
+        const { data } = await api.post('/api/customers/login', {
+          email: loginForm.email,
+          password: loginForm.password
+        });
+        userData = data;
+      } catch (customerErr) {
+        // 2. Nếu khách hàng không tồn tại/sai pass, thử tiếp API dành cho Nhân viên (Staff)
+        const { data } = await api.post('/api/staff/login', {
+          email: loginForm.email,
+          password: loginForm.password
+        });
+        userData = data;
+      }
       
-      // Nếu thành công, truyền data (chứa token, name, email...) ra ngoài App.jsx
-      onLogin(data); 
+      // Thành công (dù là khách hay admin) thì truyền ra ngoài
+      onLogin(userData); 
       setLoading(false);
+      
     } catch (err) {
+      // Bắt lỗi khi cả 2 API đều thất bại
       setLoading(false);
-      // Bắt lỗi từ Backend trả về (sai pass, không tìm thấy user...)
-      setErrors({ email: err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.' });
+      setErrors({ email: err.response?.data?.message || 'Email hoặc mật khẩu không chính xác.' });
     }
   };
 
