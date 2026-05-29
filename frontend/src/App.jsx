@@ -199,6 +199,13 @@ function App() {
     s + (i.product.price || 0) * i.qty, 0
   );
 
+  // Yêu cầu đăng nhập (dành cho customer và admin)
+  const requireLogin = (page) => {
+    if (!user) { navigate('/login'); return null; }
+    return page;
+  };
+
+  // Yêu cầu quyền admin
   const requireAuth = (page) => {
     if (!user) { navigate('/login'); return null; }
     if (!user.isAdmin && !user.role) { navigate('/'); return null; }
@@ -216,13 +223,13 @@ function App() {
     
     switch (path) {
       case "/search":                return <SearchPage query={q.get("q") || ""} navigate={navigate} />;
-      case "/checkout":              return requireAuth(<CheckoutPage cartItems={cartItems} totalPrice={totalPrice} navigate={navigate} removeFromCart={removeFromCart} updateQty={updateQty} clearCart={clearCart} addOrder={addOrder} user={user} />);
+      case "/checkout":              return requireLogin(<CheckoutPage cartItems={cartItems} totalPrice={totalPrice} navigate={navigate} removeFromCart={removeFromCart} updateQty={updateQty} clearCart={clearCart} addOrder={addOrder} user={user} />);
       case "/login":                 return <LoginPage navigate={navigate} onLogin={handleLogin} />;
-      case "/account":               return requireAuth(<AccountPage user={user} onLogout={handleLogout} navigate={navigate} />);
-      case "/account/edit":          return requireAuth(<EditProfilePage user={user} onUpdateUser={handleUpdateUser} navigate={navigate} />);
-      case "/account/change-password": return requireAuth(<ChangePasswordPage navigate={navigate} />);
-      case "/account/orders":        return requireAuth(<OrdersPage navigate={navigate} orders={orders} cancelOrder={cancelOrder} />);
-      case "/account/wishlist":      return requireAuth(<WishlistPage navigate={navigate} wishlist={wishlist} onToggleWishlist={toggleWishlist} onAddToCart={addToCart} />);
+      case "/account":               return requireLogin(<AccountPage user={user} onLogout={handleLogout} navigate={navigate} />);
+      case "/account/edit":          return requireLogin(<EditProfilePage user={user} onUpdateUser={handleUpdateUser} navigate={navigate} />);
+      case "/account/change-password": return requireLogin(<ChangePasswordPage navigate={navigate} />);
+      case "/account/orders":        return requireLogin(<OrdersPage navigate={navigate} orders={orders} cancelOrder={cancelOrder} />);
+      case "/account/wishlist":      return requireLogin(<WishlistPage navigate={navigate} wishlist={wishlist} onToggleWishlist={toggleWishlist} onAddToCart={addToCart} />);
       case "/admin/dashboard":       return requireAuth(<AdminDashboard user={user} navigate={navigate} onLogout={handleLogout} />);
       case "/admin/products":        return requireAuth(<AdminProducts user={user} navigate={navigate} onLogout={handleLogout} />);
       case "/admin/orders":          return requireAuth(<AdminOrders user={user} navigate={navigate} onLogout={handleLogout} />);
