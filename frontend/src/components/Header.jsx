@@ -12,7 +12,7 @@ const Header = ({
 
   // GỌI API LẤY DỮ LIỆU SẢN PHẨM KHI VÀO TRANG
   useEffect(() => {
-    fetch('/api/products')
+    fetch('https://cuahangquanao.onrender.com/api/products')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setDbProducts(data);

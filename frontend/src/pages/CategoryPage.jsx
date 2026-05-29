@@ -159,7 +159,7 @@ const CategoryPage = ({ slug, initialSubCat = 'Tất cả', navigate }) => {
 
   // Gọi API kéo dữ liệu thật từ MongoDB
   useEffect(() => {
-    fetch('/api/products')
+    fetch('https://cuahangquanao.onrender.com/api/products')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setDbProducts(data);

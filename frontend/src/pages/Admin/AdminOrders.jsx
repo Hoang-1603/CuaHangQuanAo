@@ -15,7 +15,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/api/orders');
+      const { data } = await api.get('https://cuahangquanao.onrender.com/api/orders');
       setOrders(data);
       setLoading(false);
     } catch (error) {

@@ -18,7 +18,7 @@ const AdminCustomers = ({ user, navigate, onLogout }) => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/api/customers');
+      const { data } = await api.get('https://cuahangquanao.onrender.com/api/customers');
       setCustomers(data);
       setLoading(false);
     } catch (error) {

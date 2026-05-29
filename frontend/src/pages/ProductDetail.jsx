@@ -65,7 +65,7 @@ const ProductDetail = ({ productId, navigate, onAddToCart }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(true);
  
-    fetch('/api/products')
+    fetch('https://cuahangquanao.onrender.com/api/products')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

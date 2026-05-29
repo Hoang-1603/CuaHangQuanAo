@@ -89,7 +89,7 @@ const AdminProducts = ({ user, navigate, onLogout }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/api/products');
+      const { data } = await api.get('https://cuahangquanao.onrender.com/api/products');
       setProducts(data);
       setLoading(false);
     } catch (error) {
@@ -193,7 +193,7 @@ const AdminProducts = ({ user, navigate, onLogout }) => {
         await api.put(`/api/products/${currentProductId}`, productData);
         alert('Cập nhật thông tin sản phẩm thành công!');
       } else {
-        await api.post('/api/products', productData);
+        await api.post('https://cuahangquanao.onrender.com/api/products', productData);
         alert('Thêm sản phẩm mới lên kệ thành công!');
       }
       setShowModal(false);

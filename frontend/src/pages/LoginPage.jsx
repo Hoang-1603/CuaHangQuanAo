@@ -25,7 +25,7 @@ const LoginPage = ({ navigate, onLogin }) => {
 
     // 1. Thử đăng nhập Customer trước
     try {
-      const { data } = await api.post('/api/customers/login', credentials);
+      const { data } = await api.post('https://cuahangquanao.onrender.com/api/customers/login', credentials);
       onLogin(data);
       setLoading(false);
       return; // Đăng nhập thành công → dừng lại
@@ -49,7 +49,7 @@ const LoginPage = ({ navigate, onLogin }) => {
 
     // 2. Thử đăng nhập Staff (chỉ khi customer trả về 404)
     try {
-      const { data } = await api.post('/api/staff/login', credentials);
+      const { data } = await api.post('https://cuahangquanao.onrender.com/api/staff/login', credentials);
       onLogin(data);
       setLoading(false);
     } catch (staffErr) {
@@ -75,7 +75,7 @@ const LoginPage = ({ navigate, onLogin }) => {
     try {
       setLoading(true);
       // Gửi request tạo user mới lên Backend
-      const { data } = await api.post('/api/customers', {
+      const { data } = await api.post('https://cuahangquanao.onrender.com/api/customers', {
         name: regForm.name,
         email: regForm.email,
         password: regForm.password

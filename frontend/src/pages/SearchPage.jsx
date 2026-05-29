@@ -373,7 +373,7 @@ const SearchPage = ({ query, navigate }) => {
     const fetchAllProducts = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get('/api/products');
+        const { data } = await api.get('https://cuahangquanao.onrender.com/api/products');
         if (Array.isArray(data)) setDbProducts(data);
         setLoading(false);
       } catch (err) {

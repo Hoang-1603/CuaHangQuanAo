@@ -22,7 +22,7 @@ const AdminCoupons = ({ user, navigate, onLogout }) => {
   const fetchCoupons = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/api/coupons');
+      const { data } = await api.get('https://cuahangquanao.onrender.com/api/coupons');
       setCoupons(data);
       setLoading(false);
     } catch (error) {
@@ -43,7 +43,7 @@ const AdminCoupons = ({ user, navigate, onLogout }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/coupons', form);
+      await api.post('https://cuahangquanao.onrender.com/api/coupons', form);
       alert('Tạo mã giảm giá thành công!');
       setShowModal(false);
       
