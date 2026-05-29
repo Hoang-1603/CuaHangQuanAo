@@ -43,7 +43,7 @@ const productExtras = {
   },
 };
  
-const ProductDetail = ({ productId, navigate, onAddToCart }) => {
+const ProductDetail = ({ productId, navigate, onAddToCart, onToggleWishlist, isWishlisted }) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mainImg, setMainImg] = useState('');
@@ -343,6 +343,22 @@ const ProductDetail = ({ productId, navigate, onAddToCart }) => {
                 }}
               >
                 MUA NGAY
+              </button>
+              {/* Nút y��u thích */}
+              <button
+                onClick={() => onToggleWishlist && onToggleWishlist(product)}
+                title={isWishlisted && isWishlisted(product?._id) ? 'Bỏ y��u thích' : 'Thêm vào y��u thích'}
+                style={{
+                  width: 50, height: 50, borderRadius: '50%', border: '1.5px solid #ddd',
+                  background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', flexShrink: 0, transition: 'border-color .2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#e53935'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#ddd'}
+              >
+                <svg width='20' height='20' viewBox='0 0 24 24' fill={isWishlisted && isWishlisted(product?._id) ? '#e53935' : 'none'} stroke={isWishlisted && isWishlisted(product?._id) ? '#e53935' : '#555'} strokeWidth='2'>
+                  <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/>
+                </svg>
               </button>
             </div>
  
