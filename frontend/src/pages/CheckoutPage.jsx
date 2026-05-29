@@ -35,7 +35,7 @@ const CheckoutPage = ({ cartItems = [], totalPrice = 0, navigate, removeFromCart
     if (!coupon.trim()) { setCouponError('Vui lòng nhập mã giảm giá'); return; }
     setCouponLoading(true); setCouponError(''); setCouponMessage('');
     try {
-      const { data } = await api.post('https://cuahangquanao.onrender.com/api/coupons/validate', { code: coupon.trim(), cartTotal: totalPrice });
+      const { data } = await api.post('/api/coupons/validate', { code: coupon.trim(), cartTotal: totalPrice });
       setDiscount(data.discountAmount); setCouponApplied(true);
       setCouponMessage(`✓ ${data.message} (-${data.discountAmount.toLocaleString()}đ)`);
     } catch (err) {
@@ -84,7 +84,7 @@ const CheckoutPage = ({ cartItems = [], totalPrice = 0, navigate, removeFromCart
         itemsPrice: totalPrice, shippingPrice: shipping, discountPrice: discount,
         totalPrice: finalTotal, note: form.note
       };
-      await api.post('https://cuahangquanao.onrender.com/api/orders', orderData);
+      await api.post('/api/orders', orderData);
       if (clearCart) clearCart();
       setSubmitted(true); setLoading(false);
     } catch (err) {

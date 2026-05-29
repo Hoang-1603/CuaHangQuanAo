@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import api from '../api/api';
 
 // Map slug → cấu hình tiêu đề và danh mục con
 const CATEGORY_MAP = {
@@ -159,12 +160,7 @@ const CategoryPage = ({ slug, initialSubCat = 'Tất cả', navigate }) => {
 
   // Gọi API kéo dữ liệu thật từ MongoDB
   useEffect(() => {
-    fetch('https://cuahangquanao.onrender.com/api/products')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setDbProducts(data);
-      })
-      .catch(err => console.error("Lỗi gọi API Category:", err));
+    api.get('/api/products').then(res => { if (Array.isArray(res.data)) setDbProducts(res.data); }).catch(err => console.error('Lỗi gọi API:', err));
   }, []);
 
   const toggleFilter = (key) => setOpenFilter(prev => prev === key ? null : key);

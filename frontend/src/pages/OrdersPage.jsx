@@ -129,7 +129,7 @@ const OrdersPage = ({ navigate }) => {
   const fetchMyOrders = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('https://cuahangquanao.onrender.com/api/orders/myorders');
+      const { data } = await api.get('/api/orders/myorders');
       setDbOrders(data);
       setLoading(false);
     } catch (error) {

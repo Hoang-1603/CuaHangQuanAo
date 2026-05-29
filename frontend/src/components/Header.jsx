@@ -1,3 +1,4 @@
+import api from '../api/api';
 import React, { useState, useEffect } from 'react';
 
 const Header = ({
@@ -12,12 +13,7 @@ const Header = ({
 
   // GỌI API LẤY DỮ LIỆU SẢN PHẨM KHI VÀO TRANG
   useEffect(() => {
-    fetch('https://cuahangquanao.onrender.com/api/products')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setDbProducts(data);
-      })
-      .catch(err => console.error("Lỗi lấy dữ liệu menu:", err));
+    api.get('/api/products').then(res => { if (Array.isArray(res.data)) setDbProducts(res.data); }).catch(err => console.error('Lỗi gọi API:', err));
   }, []);
 
   // ĐỊNH NGHĨA MENU & LỌC ĐỘNG 3 SẢN PHẨM MỚI NHẤT TỪ DATABASE

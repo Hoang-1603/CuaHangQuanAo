@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../api/api';
 
 // --- SUB-COMPONENT: PRODUCT CARD ---
 const ProductCard = ({ product, onQuickView, navigate }) => {
@@ -140,12 +141,7 @@ const Home = ({ navigate, onAddToCart }) => {
 
   // Kéo dữ liệu từ API Backend khi load trang
   useEffect(() => {
-    fetch('https://cuahangquanao.onrender.com/api/products')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setDbProducts(data);
-      })
-      .catch(err => console.error("Lỗi kết nối API:", err));
+    api.get('/api/products').then(res => { if (Array.isArray(res.data)) setDbProducts(res.data); }).catch(err => console.error('Lỗi gọi API:', err));
   }, []);
 
   // Map tiêu đề section → category slug

@@ -31,7 +31,7 @@ const EditProfilePage = ({ user, navigate, onUpdateUser }) => {
     try {
       setLoading(true);
       setSuccess('');
-      const { data } = await api.put('https://cuahangquanao.onrender.com/api/customers/profile', {
+      const { data } = await api.put('/api/customers/profile', {
         name: form.name,
         email: form.email,
         phone: form.phone,

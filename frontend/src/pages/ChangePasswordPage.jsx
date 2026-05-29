@@ -91,7 +91,7 @@ const ChangePasswordPage = ({ navigate }) => {
       setLoading(true);
       
       // Gọi API cập nhật password
-      await api.put('https://cuahangquanao.onrender.com/api/customers/profile', {
+      await api.put('/api/customers/profile', {
         oldPassword: form.old,
         password: form.new
       });

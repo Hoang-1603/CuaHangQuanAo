@@ -16,7 +16,7 @@ const AdminDashboard = ({ user, navigate, onLogout }) => {
     // Gọi API lấy dữ liệu thống kê
     const fetchStats = async () => {
       try {
-        const { data } = await api.get('https://cuahangquanao.onrender.com/api/dashboard');
+        const { data } = await api.get('/api/dashboard');
         setStats(data);
         setLoading(false);
       } catch (error) {

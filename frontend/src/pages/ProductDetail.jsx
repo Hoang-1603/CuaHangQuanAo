@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../api/api';
  
 // Từ điển ánh xạ tên màu → mã HEX
 const colorDictionary = {
@@ -65,12 +66,11 @@ const ProductDetail = ({ productId, navigate, onAddToCart }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(true);
  
-    fetch('https://cuahangquanao.onrender.com/api/products')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setDbProducts(data);
-          const found = data.find(p => String(p._id) === String(productId));
+    api.get('/api/products')
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          setDbProducts(res.data);
+          const found = res.data.find(p => String(p._id) === String(productId));
           setProduct(found || null);
         }
         setLoading(false);
