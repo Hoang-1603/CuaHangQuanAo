@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/api'; // Hãy điều chỉnh lại số dấu chấm nếu bạn để file trong folder con
 import AdminSidebar from '../../components/AdminSidebar';
-
+ 
 const AdminOrders = ({ user, navigate, onLogout }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
-
+ 
   // State xem chi tiết đơn hàng bằng Modal
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
+ 
   // Gọi API lấy toàn bộ danh sách đơn hàng từ hệ thống
   const fetchOrders = async () => {
     try {
@@ -23,7 +23,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
       setLoading(false);
     }
   };
-
+ 
   useEffect(() => {
     if (!user || (!user.isAdmin && !user.role)) {
       navigate('/login');
@@ -31,7 +31,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
     }
     fetchOrders();
   }, [user, navigate]);
-
+ 
   // Cập nhật trạng thái xử lý đơn hàng (Chờ xác nhận -> Đang xử lý -> Đang giao -> Đã giao)
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -48,7 +48,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
       alert(error.response?.data?.message || 'Không thể cập nhật trạng thái đơn');
     }
   };
-
+ 
   // Hủy hoặc xóa đơn hàng hoàn toàn khỏi hệ thống
   const handleDeleteOrder = async (orderId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa đơn hàng này khỏi hệ thống không?')) {
@@ -62,11 +62,11 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
       }
     }
   };
-
+ 
   // Lọc đơn hàng dựa trên trạng thái được chọn trên thanh công cụ
   const filteredOrders = statusFilter ? orders.filter(o => o.orderStatus === statusFilter) : orders;
-
-
+ 
+ 
   // Hàm phụ trợ tạo màu sắc nhãn trạng thái trực quan
   const getStatusBadgeStyle = (status) => {
     const styles = {
@@ -78,19 +78,19 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
     };
     return styles[status] || { color: '#333', bg: '#eee' };
   };
-
+ 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Segoe UI', sans-serif", background: '#f5f7fa' }}>
       
       {/* SIDEBAR TƯƠNG ĐỒNG CÁC TRANG TRƯỚC */}
       <AdminSidebar activePath={window.location.pathname} navigate={navigate} onLogout={onLogout} />
-
+ 
       {/* NỘI DUNG QUẢN LÝ ĐƠN HÀNG */}
       <div style={{ flex: 1, padding: '40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111', margin: 0 }}>Quản lý Đơn hàng</h1>
         </div>
-
+ 
         {/* THANH BỘ LỌC TRẠNG THÁI */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 25 }}>
           {['', 'Chờ xác nhận', 'Đang xử lý', 'Đang giao', 'Đã giao', 'Đã hủy'].map(status => (
@@ -107,7 +107,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
             </button>
           ))}
         </div>
-
+ 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px', color: '#666' }}>Đang tải dữ liệu hóa đơn...</div>
         ) : (
@@ -119,7 +119,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
                   <th style={{ padding: '15px 20px', fontSize: 13, color: '#555' }}>Khách hàng</th>
                   <th style={{ padding: '15px 20px', fontSize: 13, color: '#555' }}>Ngày đặt hàng</th>
                   <th style={{ padding: '15px 20px', fontSize: 13, color: '#555' }}>Tổng thanh toán</th>
-                  <th style={{ padding: '15px 20px', fontSize: 13, color: '#555' }}>Thanh toán</th>
+ 
                   <th style={{ padding: '15px 20px', fontSize: 13, color: '#555' }}>Trạng thái đơn</th>
                   <th style={{ padding: '15px 20px', fontSize: 13, color: '#555', textAlign: 'center' }}>Thao tác</th>
                 </tr>
@@ -127,7 +127,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
               <tbody>
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#999' }}>Không ghi nhận đơn hàng nào phù hợp với bộ lọc hiện tại.</td>
+                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#999' }}>Không ghi nhận đơn hàng nào phù hợp với bộ lọc hiện tại.</td>
                   </tr>
                 ) : (
                   filteredOrders.map(order => {
@@ -143,16 +143,29 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
                           {new Date(order.createdAt).toLocaleDateString('vi-VN')} {new Date(order.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                         </td>
                         <td style={{ padding: '15px 20px', fontWeight: 700, color: '#111' }}>{order.totalPrice?.toLocaleString()}đ</td>
-                        <td style={{ padding: '15px 20px', fontSize: 13 }}>
-                          <span style={{ color: order.isPaid ? '#2e7d32' : '#c62828', fontWeight: 600 }}>
-                            {order.isPaid ? '✓ Đã trả tiền' : '✕ Chưa trả tiền'}
-                          </span>
-                          <div style={{ fontSize: 11, color: '#777', marginTop: 2 }}>{order.paymentMethod}</div>
-                        </td>
+ 
                         <td style={{ padding: '15px 20px' }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: badge.color, background: badge.bg, padding: '4px 12px', borderRadius: 12 }}>
-                            {order.orderStatus}
-                          </span>
+                          {(() => {
+                            const flow = ['Chờ xác nhận', 'Đang xử lý', 'Đang giao', 'Đã giao'];
+                            const currentIdx = flow.indexOf(order.orderStatus);
+                            const nextStatus = currentIdx !== -1 && currentIdx < flow.length - 1 ? flow[currentIdx + 1] : null;
+                            return (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: 12, fontWeight: 700, color: badge.color, background: badge.bg, padding: '4px 12px', borderRadius: 12, whiteSpace: 'nowrap' }}>
+                                  {order.orderStatus}
+                                </span>
+                                {nextStatus && (
+                                  <button
+                                    onClick={() => handleUpdateStatus(order._id, nextStatus)}
+                                    title={`Chuyển sang: ${nextStatus}`}
+                                    style={{ padding: '3px 10px', fontSize: 11, fontWeight: 700, background: '#1565c0', color: '#fff', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                  >
+                                    → {nextStatus}
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td style={{ padding: '15px 20px', textAlign: 'center' }}>
                           <button
@@ -171,7 +184,7 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
           </div>
         )}
       </div>
-
+ 
       {/* MODAL CHI TIẾT ĐƠN HÀNG & CẬP NHẬT TRẠNG THÁI TRỰC TIẾP */}
       {showDetailModal && selectedOrder && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
@@ -181,26 +194,15 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Chi tiết đơn hàng: <span style={{ fontFamily: 'monospace', fontSize: 15, color: '#1565c0' }}>{selectedOrder._id}</span></h2>
               <button onClick={() => setShowDetailModal(false)} style={{ border: 'none', background: 'none', fontSize: 24, cursor: 'pointer', color: '#aaa' }}>&times;</button>
             </div>
-
+ 
             {/* THÔNG TIN GIAO NHẬN HÀNG */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20, background: '#f8f9fa', padding: 15, borderRadius: 6 }}>
-              <div>
-                <h4 style={{ margin: '0 0 8px', fontSize: 13, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5 }}>Thông tin nhận hàng</h4>
-                <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600 }}>{selectedOrder.shippingAddress?.phone}</p>
-                <p style={{ margin: 0, fontSize: 13, color: '#444', lineHeight: 1.4 }}>{selectedOrder.shippingAddress?.address}, {selectedOrder.shippingAddress?.city}</p>
-              </div>
-              <div>
-                <h4 style={{ margin: '0 0 8px', fontSize: 13, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5 }}>Giao dịch thanh toán</h4>
-                <p style={{ margin: '0 0 4px', fontSize: 13 }}>Hình thức: <strong>{selectedOrder.paymentMethod}</strong></p>
-                <p style={{ margin: '0 0 4px', fontSize: 13, color: selectedOrder.isPaid ? '#2e7d32' : '#c62828', fontWeight: 600 }}>
-                  {selectedOrder.isPaid ? `✓ Đã thanh toán lúc: ${new Date(selectedOrder.paidAt).toLocaleDateString('vi-VN')}` : '✕ Chưa hoàn tất thanh toán'}
-                </p>
-                <p style={{ margin: 0, fontSize: 13, color: selectedOrder.isDelivered ? '#2e7d32' : '#777' }}>
-                  Vận chuyển: {selectedOrder.isDelivered ? `✓ Đã giao hàng ngày ${new Date(selectedOrder.deliveredAt).toLocaleDateString('vi-VN')}` : '...Đang điều phối giao nhận'}
-                </p>
-              </div>
+            <div style={{ marginBottom: 20, background: '#f8f9fa', padding: 15, borderRadius: 6 }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: 13, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5 }}>Thông tin nhận hàng</h4>
+              <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600 }}>{selectedOrder.shippingAddress?.name} — {selectedOrder.shippingAddress?.phone}</p>
+              <p style={{ margin: '0 0 4px', fontSize: 13, color: '#444' }}>{selectedOrder.shippingAddress?.address}{selectedOrder.shippingAddress?.ward ? ', ' + selectedOrder.shippingAddress.ward : ''}{selectedOrder.shippingAddress?.district ? ', ' + selectedOrder.shippingAddress.district : ''}{selectedOrder.shippingAddress?.city ? ', ' + selectedOrder.shippingAddress.city : ''}</p>
+              <p style={{ margin: 0, fontSize: 13, color: '#555' }}>Thanh toán: <strong>{selectedOrder.paymentMethod}</strong></p>
             </div>
-
+ 
             {/* DANH SÁCH QUẦN ÁO ĐÃ ĐẶT */}
             <h4 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700 }}>Danh sách sản phẩm mua ({selectedOrder.orderItems?.length || 0})</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, border: '1px solid #eee', padding: 10, borderRadius: 6, marginBottom: 25 }}>
@@ -217,29 +219,33 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
                   </div>
                 </div>
               ))}
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #eee', paddingTop: 12, marginTop: 5, fontWeight: 700, fontSize: 15 }}>
-                <span>Tổng giá trị đơn hàng:</span>
-                <span style={{ color: '#d32f2f' }}>{selectedOrder.totalPrice?.toLocaleString()}đ</span>
+              {/* Tóm tắt giá */}
+              <div style={{ borderTop: '1px solid #eee', paddingTop: 12, marginTop: 5 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#555', marginBottom: 6 }}>
+                  <span>Tạm tính:</span>
+                  <span>{selectedOrder.itemsPrice?.toLocaleString() ?? selectedOrder.totalPrice?.toLocaleString()}đ</span>
+                </div>
+                {selectedOrder.shippingPrice > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#555', marginBottom: 6 }}>
+                    <span>Phí vận chuyển:</span>
+                    <span>+{selectedOrder.shippingPrice?.toLocaleString()}đ</span>
+                  </div>
+                )}
+                {selectedOrder.couponCode && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                    <span style={{ color: '#2e7d32', fontWeight: 600 }}>🏷 Voucher <span style={{ fontFamily: 'monospace', background: '#e8f5e9', padding: '1px 6px', borderRadius: 4 }}>{selectedOrder.couponCode}</span>:</span>
+                    <span style={{ color: '#2e7d32', fontWeight: 600 }}>-{selectedOrder.discountPrice?.toLocaleString()}đ</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 15, borderTop: '1px solid #eee', paddingTop: 10, marginTop: 4 }}>
+                  <span>Tổng thanh toán:</span>
+                  <span style={{ color: '#d32f2f' }}>{selectedOrder.totalPrice?.toLocaleString()}đ</span>
+                </div>
               </div>
             </div>
-
-            {/* ĐIỀU CHỈNH TRẠNG THÁI VÀ XỬ LÝ ĐƠN HÀNG */}
-            <div style={{ borderTop: '1px solid #eee', paddingTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 700, display: 'block', marginBottom: 6 }}>Chuyển trạng thái đơn:</label>
-                <select
-                  value={selectedOrder.orderStatus}
-                  onChange={(e) => handleUpdateStatus(selectedOrder._id, e.target.value)}
-                  style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: 6, fontSize: 13, outline: 'none', background: '#fff', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  <option value="Chờ xác nhận">Chờ xác nhận</option>
-                  <option value="Đang xử lý">Đang xử lý</option>
-                  <option value="Đang giao">Đang giao</option>
-                  <option value="Đã giao">Đã giao</option>
-                  <option value="Đã hủy">Đã hủy</option>
-                </select>
-              </div>
-
+ 
+            {/* XỬ LÝ ĐƠN HÀNG */}
+            <div style={{ borderTop: '1px solid #eee', paddingTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button
                   type="button"
@@ -257,12 +263,12 @@ const AdminOrders = ({ user, navigate, onLogout }) => {
                 </button>
               </div>
             </div>
-
+ 
           </div>
         </div>
       )}
     </div>
   );
 };
-
+ 
 export default AdminOrders;

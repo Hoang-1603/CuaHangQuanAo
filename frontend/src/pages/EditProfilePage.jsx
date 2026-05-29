@@ -1,226 +1,147 @@
-// import React, { useState } from 'react';
-
-// const TINH_THANH = ['Hà Nội','TP. Hồ Chí Minh','Đà Nẵng','Hải Phòng','Cần Thơ','Bắc Ninh','Thanh Hóa','Nghệ An','Thái Nguyên','Bình Dương'];
-// const QUAN_HUYEN = {
-//   'Hà Nội': ['Hoàn Kiếm','Đống Đa','Hai Bà Trưng','Cầu Giấy','Hà Đông','Bắc Từ Liêm'],
-//   'TP. Hồ Chí Minh': ['Quận 1','Quận 3','Bình Thạnh','Gò Vấp','Tân Bình'],
-// };
-// const PHUONG_XA = {
-//   'Hoàn Kiếm': ['Hàng Bạc','Hàng Bồ','Hàng Đào','Lý Thái Tổ'],
-//   'Đống Đa': ['Cát Linh','Hàng Bột','Khâm Thiên','Láng Hạ'],
-// };
-
-// const EditProfilePage = ({ user, onUpdateUser, navigate }) => {
-//   const [form, setForm] = useState({
-//     name: user?.name || '', dob: '', phone: '', email: user?.email || '',
-//     tinh: '', huyen: '', phuong: '', address: '',
-//   });
-//   const [saved, setSaved] = useState(false);
-//   const set = (f, v) => setForm(p => ({ ...p, [f]: v }));
-
-//   const handleSave = () => {
-//     if (onUpdateUser) onUpdateUser({ ...user, name: form.name, email: form.email });
-//     setSaved(true);
-//     setTimeout(() => setSaved(false), 2000);
-//   };
-
-//   const fieldStyle = {
-//     width: '100%', padding: '10px 12px', border: '1px solid #ddd',
-//     fontSize: 13, outline: 'none', borderRadius: 4, boxSizing: 'border-box',
-//     fontFamily: 'inherit', color: '#222',
-//   };
-//   const labelStyle = { fontSize: 13, color: '#444', textAlign: 'right', paddingTop: 10, paddingRight: 20 };
-
-//   const Row = ({ label, children }) => (
-//     <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 0, marginBottom: 16, alignItems: 'start' }}>
-//       <span style={labelStyle}>{label}</span>
-//       <div>{children}</div>
-//     </div>
-//   );
-
-//   return (
-//     <div style={{ maxWidth: 760, margin: '0 auto', padding: '40px 5% 80px', fontFamily: "'Segoe UI', sans-serif" }}>
-//       <h1 style={{ fontSize: 22, fontWeight: 800, textAlign: 'center', marginBottom: 40, color: '#111' }}>Thông tin cá nhân</h1>
-
-//       <Row label="Họ tên:">
-//         <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Họ và tên" style={fieldStyle} />
-//       </Row>
-//       <Row label="Ngày sinh:">
-//         <input type="date" value={form.dob} onChange={e => set('dob', e.target.value)} placeholder="Ngày sinh" style={fieldStyle} />
-//       </Row>
-//       <Row label="Điện thoại:">
-//         <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="Điện thoại" style={fieldStyle} />
-//       </Row>
-//       <Row label="Email:">
-//         <input value={form.email} onChange={e => set('email', e.target.value)} placeholder="Email" style={fieldStyle} />
-//       </Row>
-//       <Row label="Tỉnh/Thành phố :">
-//         <select value={form.tinh} onChange={e => { set('tinh', e.target.value); set('huyen',''); set('phuong',''); }} style={{ ...fieldStyle, cursor: 'pointer' }}>
-//           <option value="">Chọn Tỉnh/ thành phố</option>
-//           {TINH_THANH.map(t => <option key={t} value={t}>{t}</option>)}
-//         </select>
-//       </Row>
-//       <Row label="Quận/Huyện:">
-//         <select value={form.huyen} onChange={e => { set('huyen', e.target.value); set('phuong',''); }} style={{ ...fieldStyle, cursor: 'pointer' }}>
-//           <option value="">Chọn Quận/ Huyện</option>
-//           {(QUAN_HUYEN[form.tinh] || []).map(q => <option key={q} value={q}>{q}</option>)}
-//         </select>
-//       </Row>
-//       <Row label="Phường xã :">
-//         <select value={form.phuong} onChange={e => set('phuong', e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-//           <option value="">Chọn Phường/ Xã</option>
-//           {(PHUONG_XA[form.huyen] || []).map(p => <option key={p} value={p}>{p}</option>)}
-//         </select>
-//       </Row>
-//       <Row label="Địa chỉ chi tiết:">
-//         <input value={form.address} onChange={e => set('address', e.target.value)} placeholder="Địa chỉ chi tiết" style={fieldStyle} />
-//       </Row>
-
-//       <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 32 }}>
-//         <button onClick={handleSave}
-//           style={{ padding: '11px 32px', background: saved ? '#555' : '#333', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, borderRadius: 2, transition: '.2s' }}>
-//           {saved ? '✓ Đã lưu' : 'Cập nhật'}
-//         </button>
-//         <button onClick={() => navigate('/account')}
-//           style={{ padding: '11px 32px', background: '#fff', color: '#444', border: '1px solid #ddd', cursor: 'pointer', fontSize: 13, fontWeight: 600, borderRadius: 2 }}>
-//           Quay lại
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default EditProfilePage;
-
-
-
-
 import React, { useState } from 'react';
 import api from '../api/api';
-
-const TINH_THANH = ['Hà Nội','TP. Hồ Chí Minh','Đà Nẵng','Hải Phòng','Cần Thơ','Bắc Ninh','Thanh Hóa','Nghệ An','Thái Nguyên','Bình Dương'];
-const QUAN_HUYEN = {
-  'Hà Nội': ['Hoàn Kiếm','Đống Đa','Hai Bà Trưng','Cầu Giấy','Hà Đông','Bắc Từ Liêm'],
-  'TP. Hồ Chí Minh': ['Quận 1','Quận 3','Bình Thạnh','Gò Vấp','Tân Bình'],
-};
-const PHUONG_XA = {
-  'Hoàn Kiếm': ['Hàng Bạc','Hàng Bồ','Hàng Đào','Lý Thái Tổ'],
-  'Đống Đa': ['Cát Linh','Hàng Bột','Khâm Thiên','Láng Hạ'],
-};
-
-const EditProfilePage = ({ user, onUpdateUser, navigate }) => {
+ 
+const EditProfilePage = ({ user, navigate, onUpdateUser }) => {
   const [form, setForm] = useState({
-    name: user?.name || '', 
-    dob: user?.dob || '', 
-    phone: user?.phone || '', 
+    name: user?.name || '',
     email: user?.email || '',
-    tinh: user?.tinh || '', 
-    huyen: user?.huyen || '', 
-    phuong: user?.phuong || '', 
+    phone: user?.phone || '',
+    tinh: user?.tinh || user?.city || '',
+    huyen: user?.huyen || user?.district || '',
+    phuong: user?.phuong || user?.ward || '',
     address: user?.address || '',
   });
-  
-  const [saved, setSaved] = useState(false);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const set = (f, v) => setForm(p => ({ ...p, [f]: v }));
-
-  const handleSave = async () => {
+  const [success, setSuccess] = useState('');
+ 
+  const set = (field, val) => setForm(f => ({ ...f, [field]: val }));
+ 
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = 'Vui lòng nhập họ và tên';
+    if (!form.phone.trim()) e.phone = 'Vui lòng nhập số điện thoại';
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Email không hợp lệ';
+    return e;
+  };
+ 
+  const handleSubmit = async () => {
+    const e = validate();
+    if (Object.keys(e).length > 0) { setErrors(e); return; }
     try {
       setLoading(true);
-      setError('');
-      
-      // Gửi dữ liệu cập nhật lên Backend
+      setSuccess('');
       const { data } = await api.put('/api/customers/profile', {
         name: form.name,
         email: form.email,
         phone: form.phone,
-        dob: form.dob,
         tinh: form.tinh,
         huyen: form.huyen,
         phuong: form.phuong,
         address: form.address,
       });
-
-      // Cập nhật state ở App.jsx
       if (onUpdateUser) onUpdateUser(data);
-      
-      setSaved(true);
+      setSuccess('Cập nhật thông tin thành công!');
       setLoading(false);
-      setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Không thể cập nhật thông tin. Vui lòng thử lại.');
+      alert(err.response?.data?.message || 'Lỗi khi cập nhật thông tin');
       setLoading(false);
     }
   };
-
-  const fieldStyle = {
-    width: '100%', padding: '10px 12px', border: '1px solid #ddd',
-    fontSize: 13, outline: 'none', borderRadius: 4, boxSizing: 'border-box',
-    fontFamily: 'inherit', color: '#222',
-  };
-  const labelStyle = { fontSize: 13, color: '#444', textAlign: 'right', paddingTop: 10, paddingRight: 20 };
-
-  const Row = ({ label, children }) => (
-    <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 0, marginBottom: 16, alignItems: 'start' }}>
-      <span style={labelStyle}>{label}</span>
-      <div>{children}</div>
-    </div>
-  );
-
+ 
+  const inputStyle = (field) => ({
+    width: '100%',
+    padding: '10px 14px',
+    border: `1px solid ${errors[field] ? '#e53935' : '#ddd'}`,
+    fontSize: 13,
+    outline: 'none',
+    borderRadius: 4,
+    boxSizing: 'border-box',
+    fontFamily: 'inherit',
+    color: '#222',
+  });
+ 
+  const labelStyle = { fontSize: 13, color: '#555', display: 'block', marginBottom: 6 };
+ 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '40px 5% 80px', fontFamily: "'Segoe UI', sans-serif" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, textAlign: 'center', marginBottom: 40, color: '#111' }}>Thông tin cá nhân</h1>
-
-      {error && <p style={{ color: '#e53935', textAlign: 'center', fontSize: 13, marginBottom: 16 }}>{error}</p>}
-
-      <Row label="Họ tên:">
-        <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Họ và tên" style={fieldStyle} />
-      </Row>
-      <Row label="Ngày sinh:">
-        <input type="date" value={form.dob} onChange={e => set('dob', e.target.value)} placeholder="Ngày sinh" style={fieldStyle} />
-      </Row>
-      <Row label="Điện thoại:">
-        <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="Điện thoại" style={fieldStyle} />
-      </Row>
-      <Row label="Email:">
-        <input value={form.email} onChange={e => set('email', e.target.value)} placeholder="Email" style={fieldStyle} />
-      </Row>
-      <Row label="Tỉnh/Thành phố :">
-        <select value={form.tinh} onChange={e => { set('tinh', e.target.value); set('huyen',''); set('phuong',''); }} style={{ ...fieldStyle, cursor: 'pointer' }}>
-          <option value="">Chọn Tỉnh/ thành phố</option>
-          {TINH_THANH.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
-      </Row>
-      <Row label="Quận/Huyện:">
-        <select value={form.huyen} onChange={e => { set('huyen', e.target.value); set('phuong',''); }} style={{ ...fieldStyle, cursor: 'pointer' }}>
-          <option value="">Chọn Quận/ Huyện</option>
-          {(QUAN_HUYEN[form.tinh] || []).map(q => <option key={q} value={q}>{q}</option>)}
-        </select>
-      </Row>
-      <Row label="Phường xã :">
-        <select value={form.phuong} onChange={e => set('phuong', e.target.value)} style={{ ...fieldStyle, cursor: 'pointer' }}>
-          <option value="">Chọn Phường/ Xã</option>
-          {(PHUONG_XA[form.huyen] || []).map(p => <option key={p} value={p}>{p}</option>)}
-        </select>
-      </Row>
-      <Row label="Địa chỉ chi tiết:">
-        <input value={form.address} onChange={e => set('address', e.target.value)} placeholder="Địa chỉ chi tiết" style={fieldStyle} />
-      </Row>
-
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 32 }}>
-        <button onClick={handleSave} disabled={loading}
-          style={{ padding: '11px 32px', background: saved ? '#555' : '#333', color: '#fff', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600, borderRadius: 2, transition: '.2s' }}>
-          {loading ? 'Đang xử lý...' : (saved ? '✓ Đã lưu' : 'Cập nhật')}
-        </button>
-        <button onClick={() => navigate('/account')}
-          style={{ padding: '11px 32px', background: '#fff', color: '#444', border: '1px solid #ddd', cursor: 'pointer', fontSize: 13, fontWeight: 600, borderRadius: 2 }}>
-          Quay lại
-        </button>
+    <div style={{ fontFamily: "'Segoe UI', sans-serif", minHeight: '80vh' }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 5% 80px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+          <span style={{ cursor: 'pointer', fontSize: 13, color: '#888' }} onClick={() => navigate && navigate('/account')}>‹ Tài khoản</span>
+          <span style={{ color: '#ccc' }}>|</span>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111', margin: 0 }}>Chỉnh sửa thông tin</h2>
+        </div>
+ 
+        {success && (
+          <div style={{ background: '#f0faf4', border: '1px solid #a5d6a7', borderRadius: 4, padding: '12px 16px', marginBottom: 24, fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>
+            ✓ {success}
+          </div>
+        )}
+ 
+        <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 8, padding: '28px 32px' }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 20, paddingBottom: 12, borderBottom: '1px solid #f0f0f0' }}>Thông tin cá nhân</h3>
+ 
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Họ và tên *</label>
+            <input value={form.name} onChange={e => { set('name', e.target.value); setErrors(er => ({ ...er, name: '' })); }} style={inputStyle('name')} placeholder="Nhập họ và tên" />
+            {errors.name && <p style={{ color: '#e53935', fontSize: 11, marginTop: 4 }}>{errors.name}</p>}
+          </div>
+ 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <div>
+              <label style={labelStyle}>Email</label>
+              <input value={form.email} onChange={e => { set('email', e.target.value); setErrors(er => ({ ...er, email: '' })); }} style={inputStyle('email')} placeholder="email@example.com" type="email" />
+              {errors.email && <p style={{ color: '#e53935', fontSize: 11, marginTop: 4 }}>{errors.email}</p>}
+            </div>
+            <div>
+              <label style={labelStyle}>Số điện thoại *</label>
+              <input value={form.phone} onChange={e => { set('phone', e.target.value); setErrors(er => ({ ...er, phone: '' })); }} style={inputStyle('phone')} placeholder="0xxxxxxxxx" />
+              {errors.phone && <p style={{ color: '#e53935', fontSize: 11, marginTop: 4 }}>{errors.phone}</p>}
+            </div>
+          </div>
+ 
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 20, paddingBottom: 12, borderBottom: '1px solid #f0f0f0', marginTop: 28 }}>Địa chỉ giao hàng</h3>
+ 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <div>
+              <label style={labelStyle}>Tỉnh / Thành phố</label>
+              <input value={form.tinh} onChange={e => set('tinh', e.target.value)} style={inputStyle('tinh')} placeholder="VD: An Giang" />
+            </div>
+            <div>
+              <label style={labelStyle}>Quận / Huyện</label>
+              <input value={form.huyen} onChange={e => set('huyen', e.target.value)} style={inputStyle('huyen')} placeholder="VD: Long Xuyên" />
+            </div>
+          </div>
+ 
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Phường / Xã</label>
+            <input value={form.phuong} onChange={e => set('phuong', e.target.value)} style={inputStyle('phuong')} placeholder="VD: Phường Mỹ Bình" />
+          </div>
+ 
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Địa chỉ chi tiết (số nhà, tên đường)</label>
+            <input value={form.address} onChange={e => set('address', e.target.value)} style={inputStyle('address')} placeholder="VD: 123 Nguyễn Trãi" />
+          </div>
+ 
+          <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
+            <button
+              onClick={() => navigate && navigate('/account')}
+              style={{ flex: 1, padding: '13px', background: '#fff', color: '#555', border: '1px solid #ddd', fontWeight: 600, fontSize: 13, cursor: 'pointer', borderRadius: 4 }}
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{ flex: 2, padding: '13px', background: loading ? '#888' : '#1565C0', color: '#fff', border: 'none', fontWeight: 700, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer', borderRadius: 4, letterSpacing: 0.3 }}
+            >
+              {loading ? 'Đang lưu...' : 'Lưu thông tin'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
-
+ 
 export default EditProfilePage;

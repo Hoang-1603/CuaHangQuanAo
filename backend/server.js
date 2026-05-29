@@ -1,34 +1,41 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { connectDB } from './config/db.js'; //import ham connectDB
-
-//import cac routes
+import { connectDB } from './config/db.js';
+ 
+// import cac routes
 import productRoutes from './routes/productRoutes.js';
 import customerRoutes from './routes/customerRoutes.js';
 import staffRoutes from './routes/staffRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
-dotenv.config(); //cau hinh .env
-connectDB(); //ket noi voi MongoDB
-
-
-const app = express(); //khoi tao express
+ 
+dotenv.config();
+connectDB();
+ 
+const app = express();
 app.use(cors());
-app.use(express.json()); //middeware de express hieu json
+app.use(express.json());
+ 
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/coupons', couponRoutes)
+app.use('/api/coupons', couponRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
-
-const PORT = process.env.PORT || 5000; //cau hinh port
-app.listen(PORT, ()=>{
-    console.log(`server started at http://localhost:${PORT}`)
+ 
+// ─── Global Error Handler ───────────────────────────────────────────────────
+// Phải đặt SAU tất cả routes. Bắt mọi lỗi async/sync không được xử lý.
+app.use((err, req, res, next) => {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    res.status(statusCode).json({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    });
 });
-// duyducha22_db_user
-// rItlFLB2VnJNSk34
+ 
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`server started at http://localhost:${PORT}`);
+});

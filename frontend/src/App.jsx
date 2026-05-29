@@ -38,11 +38,14 @@ function useRouter() {
   return { path: loc.path, search: loc.search, navigate };
 }
 
+// Helper: lấy cart key theo email
+const cartKey = (email) => `cart_${email}`;
+const wishlistKey = (email) => `wishlist_${email}`;
+
 function App() {
   const { path, search, navigate } = useRouter();
 
   // ——— USER AUTH ———
-  // CẬP NHẬT: Lấy thông tin user từ localStorage để không bị mất khi F5
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('userInfo');
     return saved ? JSON.parse(saved) : null;
@@ -51,33 +54,64 @@ function App() {
   const [pendingAction, setPendingAction] = useState(null);
   const [pendingWishlist, setPendingWishlist] = useState(null);
 
-  // Lưu data riêng mỗi tài khoản: { [email]: { cart, orders, wishlist } }
-  const userDataStore = useRef({});
+  // ——— STATE GIỎ HÀNG — khởi tạo từ localStorage nếu đã đăng nhập ———
+  const [cartItems, setCartItems] = useState(() => {
+    const savedUser = localStorage.getItem('userInfo');
+    if (savedUser) {
+      const u = JSON.parse(savedUser);
+      const saved = localStorage.getItem(cartKey(u.email));
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
 
-  // ——— STATE GIỎ HÀNG & ĐƠN HÀNG ———
-  const [cartItems, setCartItems]   = useState([]);
-  const [orders, setOrders]         = useState([]);
-  const [wishlist, setWishlist]     = useState([]);
+  const [orders, setOrders] = useState([]);
+
+  // ——— WISHLIST — khởi tạo từ localStorage ———
+  const [wishlist, setWishlist] = useState(() => {
+    const savedUser = localStorage.getItem('userInfo');
+    if (savedUser) {
+      const u = JSON.parse(savedUser);
+      const saved = localStorage.getItem(wishlistKey(u.email));
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // ——— PERSIST CART vào localStorage mỗi khi thay đổi ———
+  useEffect(() => {
+    if (user?.email) {
+      localStorage.setItem(cartKey(user.email), JSON.stringify(cartItems));
+    }
+  }, [cartItems, user]);
+
+  // ——— PERSIST WISHLIST vào localStorage ———
+  useEffect(() => {
+    if (user?.email) {
+      localStorage.setItem(wishlistKey(user.email), JSON.stringify(wishlist));
+    }
+  }, [wishlist, user]);
 
   // ——— XỬ LÝ ĐĂNG NHẬP / ĐĂNG XUẤT ———
   const handleLogin = (u) => {
-    // CẬP NHẬT: Lưu userInfo vào localStorage
     localStorage.setItem('userInfo', JSON.stringify(u));
-    
-    const saved = userDataStore.current[u.email] || { cart: [], orders: [], wishlist: [] };
-    setUser(u);
-    setCartItems(saved.cart);
-    setOrders(saved.orders);
-    setWishlist(saved.wishlist || []);
 
-    // Xử lý các hành động chờ (Mua hàng hoặc Thêm yêu thích trước khi đăng nhập)
+    // Load cart và wishlist từ localStorage của user này
+    const savedCart = localStorage.getItem(cartKey(u.email));
+    const savedWishlist = localStorage.getItem(wishlistKey(u.email));
+
+    setUser(u);
+    setCartItems(savedCart ? JSON.parse(savedCart) : []);
+    setWishlist(savedWishlist ? JSON.parse(savedWishlist) : []);
+
+    // Xử lý các hành động chờ
     if (pendingWishlist) {
       const { product, returnPath } = pendingWishlist;
       setWishlist(prev => {
         const exists = prev.find(p => p._id === product._id);
-        const updated = exists ? prev : [...prev, product];
-        return updated;
+        return exists ? prev : [...prev, product];
       });
       setPendingWishlist(null);
       navigate(returnPath || '/');
@@ -90,7 +124,6 @@ function App() {
       if (!openCart) navigate('/checkout');
       else { setIsCartOpen(true); navigate(returnPath || '/'); }
     } else if (window.location.pathname === '/login') {
-      // Kiểm tra xem là Admin/Nhân viên hay Khách
       if (u.isAdmin || u.role) {
         navigate('/admin/dashboard');
       } else {
@@ -100,14 +133,11 @@ function App() {
   };
 
   const handleLogout = () => {
-    // Lưu lại dữ liệu trước khi xóa phiên
-    if (user) {
-      userDataStore.current[user.email] = { cart: cartItems, orders, wishlist };
-    }
+    // Cart đã được lưu vào localStorage theo email, không cần xóa — user F5 lại vẫn còn
     localStorage.removeItem('userInfo');
-    setUser(null); 
-    setCartItems([]); 
-    setOrders([]); 
+    setUser(null);
+    setCartItems([]);
+    setOrders([]);
     setWishlist([]);
     setIsCartOpen(false);
     navigate('/');
@@ -171,11 +201,11 @@ function App() {
 
   const requireAuth = (page) => {
     if (!user) { navigate('/login'); return null; }
+    if (!user.isAdmin && !user.role) { navigate('/'); return null; }
     return page;
   };
 
   // ——— ĐỊNH NGHĨA ROUTES ———
-  // CẬP NHẬT: Regex nhận diện ID của MongoDB (24 ký tự hex)
   const productMatch  = path.match(/^\/product\/([a-f\d]{24})$/);
   const categoryMatch = path.match(/^\/category\/([^/]+)$/);
   const q = new URLSearchParams(search);
@@ -186,7 +216,7 @@ function App() {
     
     switch (path) {
       case "/search":                return <SearchPage query={q.get("q") || ""} navigate={navigate} />;
-      case "/checkout":              return requireAuth(<CheckoutPage cartItems={cartItems} totalPrice={totalPrice} navigate={navigate} removeFromCart={removeFromCart} updateQty={updateQty} clearCart={clearCart} addOrder={addOrder} />);
+      case "/checkout":              return requireAuth(<CheckoutPage cartItems={cartItems} totalPrice={totalPrice} navigate={navigate} removeFromCart={removeFromCart} updateQty={updateQty} clearCart={clearCart} addOrder={addOrder} user={user} />);
       case "/login":                 return <LoginPage navigate={navigate} onLogin={handleLogin} />;
       case "/account":               return requireAuth(<AccountPage user={user} onLogout={handleLogout} navigate={navigate} />);
       case "/account/edit":          return requireAuth(<EditProfilePage user={user} onUpdateUser={handleUpdateUser} navigate={navigate} />);

@@ -88,30 +88,38 @@ const getStaffs = async (req, res) => {
 //@route PUT /api/staff/:id
 //@access Private/Admin
 const updateStaff = async (req, res) => {
-    const staff = await Staff.findById(req.params.id);
+    try {
+        const staff = await Staff.findById(req.params.id);
 
-    if (staff) {
-        staff.name = req.body.name || staff.name;
-        staff.email = req.body.email || staff.email;
-        staff.phone = req.body.phone || staff.phone;
-        staff.role = req.body.role || staff.role;
-        staff.salary = req.body.salary || staff.salary;
-        staff.status = req.body.status || staff.status;
-        
-        // Nếu cập nhật role sang Admin thì cập nhật luôn isAdmin
-        if (req.body.role) {
-            staff.isAdmin = req.body.role === 'Admin';
+        if (staff) {
+            staff.name = req.body.name || staff.name;
+            staff.email = req.body.email || staff.email;
+            staff.phone = req.body.phone || staff.phone;
+            staff.role = req.body.role || staff.role;
+            staff.salary = req.body.salary || staff.salary;
+            staff.status = req.body.status || staff.status;
+            
+            // Nếu cập nhật role sang Admin thì cập nhật luôn isAdmin
+            if (req.body.role) {
+                staff.isAdmin = req.body.role === 'Admin';
+            }
+
+            if (req.body.password) {
+                staff.password = req.body.password;
+            }
+
+            const updatedStaff = await staff.save();
+            res.json(updatedStaff);
+        } else {
+            // Trả về response lỗi trực tiếp thay vì throw error
+            res.status(404).json({ message: 'Không tìm thấy nhân viên' });
         }
-
-        if (req.body.password) {
-            staff.password = req.body.password;
-        }
-
-        const updatedStaff = await staff.save();
-        res.json(updatedStaff);
-    } else {
-        res.status(404);
-        throw new Error('Không tìm thấy nhân viên');
+    } catch (error) {
+        // Xử lý các lỗi từ server hoặc database (VD: sai format ID)
+        res.status(500).json({ 
+            message: 'Lỗi khi cập nhật thông tin nhân viên', 
+            error: error.message 
+        });
     }
 };
 

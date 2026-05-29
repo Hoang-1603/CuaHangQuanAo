@@ -21,8 +21,8 @@ const getDashboardStats = async (req, res) => {
         };
 
         orders.forEach(order => {
-            // Chỉ cộng doanh thu những đơn không bị hủy
-            if (order.orderStatus !== 'Đã hủy') {
+            // Chỉ cộng doanh thu những đơn đã giao thành công
+            if (order.orderStatus === 'Đã giao') {
                 totalRevenue += order.totalPrice;
             }
             if (ordersByStatus[order.orderStatus] !== undefined) {

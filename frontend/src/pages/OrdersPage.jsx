@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/api'; // Kết nối với trạm phát API
+import api from '../api/api';
 
 const STATUS_COLORS = {
   'Chờ xác nhận': { color: '#d97706', bg: '#fef3c7' },
+  'Đang xử lý':   { color: '#6a1b9a', bg: '#f3e5f5' },
   'Đang giao':    { color: '#1565C0', bg: '#e3f2fd' },
   'Đã giao':      { color: '#2e7d32', bg: '#e8f5e9' },
   'Đã hủy':       { color: '#c62828', bg: '#ffebee' },
@@ -17,11 +18,18 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const Row = ({ label, value }) => (
+  <div style={{ display: 'flex', gap: 8, marginBottom: 8, fontSize: 13 }}>
+    <span style={{ color: '#888', flexShrink: 0, minWidth: 100 }}>{label}:</span>
+    <span style={{ color: '#222' }}>{value}</span>
+  </div>
+);
+
 // ——— CHI TIẾT ĐƠN HÀNG ———
 const OrderDetail = ({ order, onBack, onCancel }) => {
   const [confirmCancel, setConfirmCancel] = useState(false);
-  // Chỉ cho phép hủy đơn khi trạng thái là Chờ xác nhận
-  const canCancel = order.status === 'Chờ xác nhận';
+  // Dùng đúng field orderStatus từ DB
+  const canCancel = order.orderStatus === 'Chờ xác nhận';
 
   return (
     <div style={{ animation: 'fadeIn .25s ease' }}>
@@ -38,7 +46,7 @@ const OrderDetail = ({ order, onBack, onCancel }) => {
           <h4 style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, color: '#111', textTransform: 'uppercase', letterSpacing: 0.5 }}>Thông tin đơn hàng</h4>
           <Row label="Mã đơn"    value={'#' + order._id} />
           <Row label="Ngày đặt"  value={new Date(order.createdAt).toLocaleDateString('vi-VN')} />
-          <Row label="Trạng thái" value={<StatusBadge status={order.status} />} />
+          <Row label="Trạng thái" value={<StatusBadge status={order.orderStatus} />} />
           <Row label="Tổng tiền" value={<strong>{order.totalPrice?.toLocaleString()}đ</strong>} />
         </div>
 
@@ -47,35 +55,42 @@ const OrderDetail = ({ order, onBack, onCancel }) => {
           <Row label="Người nhận" value={order.shippingAddress?.name || '—'} />
           <Row label="SĐT"        value={order.shippingAddress?.phone || '—'} />
           <Row label="Địa chỉ"   value={order.shippingAddress?.address || '—'} />
-          <Row label="Thanh toán" value={order.paymentMethod || "COD (Khi nhận hàng)"} />
+          <Row label="Thanh toán" value={order.paymentMethod || 'COD (Khi nhận hàng)'} />
         </div>
       </div>
 
       <div style={{ border: '1px solid #eee', borderRadius: 6, overflow: 'hidden', marginBottom: 24 }}>
         <div style={{ background: '#f9f9f9', padding: '12px 20px', borderBottom: '1px solid #eee' }}>
-          <h4 style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5 }}>Sản phẩm</h4>
+          <h4 style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Sản phẩm ({order.orderItems?.length || 0})
+          </h4>
         </div>
         {(order.orderItems || []).map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px', borderBottom: i < order.orderItems.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+            {/* Ưu tiên: ảnh đã lưu trong orderItem, fallback sang populated product */}
             <img
-              src={item.product?.images?.[0] || '/images/default.jpg'}
+              src={item.image || item.product?.images?.[0] || '/images/default.jpg'}
               alt={item.name}
-              style={{ width: 60, height: 75, objectFit: 'cover', borderRadius: 4 }}
+              style={{ width: 60, height: 75, objectFit: 'cover', borderRadius: 4, background: '#f5f5f5' }}
+              onError={e => e.target.src = 'https://via.placeholder.com/60x75?text=IMG'}
             />
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 13, fontWeight: 600, margin: '0 0 4px', color: '#222' }}>{item.name}</p>
-              <p style={{ fontSize: 12, color: '#888', margin: 0 }}>Màu: {item.color} · Size: {item.size} · SL: {item.qty}</p>
+              {/* Dùng item.quantity (field từ DB), không phải item.qty */}
+              <p style={{ fontSize: 12, color: '#888', margin: 0 }}>
+                Màu: {item.color} · Size: {item.size} · SL: {item.quantity}
+              </p>
             </div>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#000', whiteSpace: 'nowrap' }}>
-              {(item.price * item.qty).toLocaleString()}đ
+              {(item.price * item.quantity).toLocaleString()}đ
             </span>
           </div>
         ))}
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '14px 20px', borderTop: '2px solid #eee', background: '#fafafa' }}>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: 12, color: '#888', margin: '0 0 4px' }}>Phí ship: {order.shippingPrice === 0 ? 'Miễn phí' : `${order.shippingPrice?.toLocaleString()}đ`}</p>
-            {order.discountPrice > 0 && <p style={{ fontSize: 12, color: '#2e7d32', margin: '0 0 4px' }}>Giảm giá: -{order.discountPrice?.toLocaleString()}đ</p>}
-            <p style={{ fontSize: 16, fontWeight: 800, color: '#000', margin: 0 }}>Tổng: {order.totalPrice?.toLocaleString()}đ</p>
+            <p style={{ fontSize: 16, fontWeight: 800, color: '#000', margin: 0 }}>
+              Tổng: {order.totalPrice?.toLocaleString()}đ
+            </p>
           </div>
         </div>
       </div>
@@ -105,13 +120,6 @@ const OrderDetail = ({ order, onBack, onCancel }) => {
   );
 };
 
-const Row = ({ label, value }) => (
-  <div style={{ display: 'flex', gap: 8, marginBottom: 8, fontSize: 13 }}>
-    <span style={{ color: '#888', flexShrink: 0, minWidth: 100 }}>{label}:</span>
-    <span style={{ color: '#222' }}>{value}</span>
-  </div>
-);
-
 // ——— MAIN PAGE ———
 const OrdersPage = ({ navigate }) => {
   const [dbOrders, setDbOrders] = useState([]);
@@ -136,7 +144,7 @@ const OrdersPage = ({ navigate }) => {
 
   const handleCancelOrder = async (orderId) => {
     try {
-      await api.put(`/api/orders/${orderId}/status`, { status: 'Đã hủy' });
+      await api.put(`/api/orders/${orderId}/cancel`, { status: 'Đã hủy' });
       fetchMyOrders();
       setSelectedOrder(null);
       alert('Đã hủy đơn hàng thành công!');
@@ -160,30 +168,46 @@ const OrdersPage = ({ navigate }) => {
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 5% 80px', fontFamily: "'Segoe UI', sans-serif" }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: 60, alignItems: 'start' }}>
         <div>
-          <h2 style={{ fontSize: 14, fontWeight: 800, letterSpacing: 1, marginBottom: 20, color: '#111' }}>ĐƠN HÀNG</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 800, letterSpacing: 1, marginBottom: 20, color: '#111' }}>ĐƠN HÀNG CỦA TÔI</h2>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #ddd' }}>
-                {['Đơn hàng', 'Thông tin đơn hàng', 'Trạng thái', 'Sản phẩm', 'Hành động'].map(h => (
+                {['Mã đơn', 'Thông tin', 'Trạng thái', 'Số sản phẩm', 'Hành động'].map(h => (
                   <th key={h} style={{ padding: '10px 8px', textAlign: 'left', fontWeight: 600, color: '#555', fontSize: 12 }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {dbOrders.length === 0 ? (
-                <tr><td colSpan={5} style={{ padding: '48px 0', textAlign: 'center', color: '#aaa', fontSize: 13 }}>Bạn chưa có đơn hàng nào.</td></tr>
+                <tr>
+                  <td colSpan={5} style={{ padding: '48px 0', textAlign: 'center', color: '#aaa', fontSize: 13 }}>
+                    Bạn chưa có đơn hàng nào.
+                  </td>
+                </tr>
               ) : (
                 dbOrders.map(order => (
                   <tr key={order._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                    <td style={{ padding: '14px 8px', fontWeight: 700, fontSize: 12 }}>#{order._id.slice(-6)}</td>
+                    <td style={{ padding: '14px 8px', fontWeight: 700, fontSize: 12 }}>
+                      #{order._id.slice(-6)}
+                    </td>
                     <td style={{ padding: '14px 8px', color: '#555', fontSize: 12 }}>
                       {new Date(order.createdAt).toLocaleDateString('vi-VN')}<br />
                       <strong style={{ color: '#000' }}>{order.totalPrice?.toLocaleString()}đ</strong>
                     </td>
-                    <td style={{ padding: '14px 8px' }}><StatusBadge status={order.status} /></td>
-                    <td style={{ padding: '14px 8px', color: '#555', fontSize: 12 }}>{order.orderItems.reduce((acc, item) => acc + item.qty, 0)} sản phẩm</td>
+                    {/* Dùng đúng field orderStatus */}
                     <td style={{ padding: '14px 8px' }}>
-                      <span onClick={() => setSelectedOrder(order)} style={{ fontSize: 12, color: '#1565C0', cursor: 'pointer', textDecoration: 'underline' }}>Xem</span>
+                      <StatusBadge status={order.orderStatus} />
+                    </td>
+                    <td style={{ padding: '14px 8px', color: '#555', fontSize: 12 }}>
+                      {order.orderItems?.reduce((acc, item) => acc + item.quantity, 0)} sản phẩm
+                    </td>
+                    <td style={{ padding: '14px 8px' }}>
+                      <span
+                        onClick={() => setSelectedOrder(order)}
+                        style={{ fontSize: 12, color: '#1565C0', cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        Xem chi tiết
+                      </span>
                     </td>
                   </tr>
                 ))
@@ -195,8 +219,12 @@ const OrdersPage = ({ navigate }) => {
         <div>
           <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20, color: '#111' }}>Tài khoản</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <span onClick={() => navigate('/account')} style={{ fontSize: 13, cursor: 'pointer', color: '#444' }}>Thông tin tài khoản</span>
-            <span style={{ fontSize: 13, cursor: 'pointer', color: '#1565C0', textDecoration: 'underline' }}>Quản lý đơn hàng</span>
+            <span onClick={() => navigate('/account')} style={{ fontSize: 13, cursor: 'pointer', color: '#444' }}>
+              Thông tin tài khoản
+            </span>
+            <span style={{ fontSize: 13, cursor: 'pointer', color: '#1565C0', textDecoration: 'underline' }}>
+              Quản lý đơn hàng
+            </span>
           </div>
         </div>
       </div>

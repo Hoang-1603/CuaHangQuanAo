@@ -28,9 +28,8 @@ const customerSchema = mongoose.Schema(
         // danh sach dia chi 
         addresses: [
             {
-                address: String,
-                city: String,
-                isDefault: { type: Boolean, default: false }
+                label: { type: String, default: '' }, // 'city' | 'district' | 'ward' | 'address'
+                value: { type: String, default: '' },
             }
         ],
 
